@@ -410,88 +410,484 @@ Fetches and merges changes:
 git pull origin main
 ```
 
-## Common Issues and Solutions
+## Pull Requests
 
-### Resolving Merge Conflicts
+Pull Requests (PRs) are a way to propose changes, discuss modifications, and merge code into a repository.
 
-When Git can't automatically merge changes:
+### Creating a Pull Request
 
-1. Git will mark the conflicts in your files
-2. Open the files and look for the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`)
-3. Edit the files to resolve the conflicts
-4. Stage the resolved files with `git add`
-5. Complete the merge with `git commit`
+1. Push your branch to GitHub:
+   ```bash
+   git push origin your-branch-name
+   ```
 
-### Undoing Changes
+2. On GitHub, navigate to the repository and click "Pull requests" > "New pull request"
+
+3. Select your branch as the "compare" branch and the target branch (usually main) as the "base" branch
+
+4. Add a title and description explaining your changes
+
+5. Click "Create pull request"
+
+### Anatomy of a Good Pull Request
+
+A good pull request includes:
+
+- **Clear title**: Summarizes what the PR does
+- **Detailed description**: Explains why the change is needed and how it works
+- **Related issues**: Links to any related issues (e.g., "Fixes #123")
+- **Screenshots/GIFs**: Visual demonstrations (if applicable)
+- **Tests**: Evidence that the code has been tested
+
+### Reviewing Pull Requests
+
+When reviewing a PR:
+
+1. Click on the "Files changed" tab to see code changes
+2. Add comments on specific lines by hovering and clicking the "+" icon
+3. Approve, request changes, or comment on the PR under "Review changes"
+
+### Merging a Pull Request
+
+Once a PR is approved:
+
+1. Click the "Merge pull request" button
+2. Choose a merge method:
+   - Create a merge commit (preserves history)
+   - Squash and merge (combines all commits)
+   - Rebase and merge (creates a linear history)
+3. Delete the branch after merging (optional)
+
+### Addressing PR Feedback
+
+When changes are requested:
+
+1. Make the changes locally
+2. Commit and push to the same branch
+3. The PR will automatically update
+
+## Git Workflows
+
+Understanding common Git workflows helps teams collaborate effectively.
+
+### GitHub Flow
+
+A lightweight workflow ideal for small teams and continuous delivery:
+
+1. Create a branch from main for your feature/fix
+2. Make changes and commit to your branch
+3. Open a pull request
+4. Discuss and review the code
+5. Deploy and test (optional)
+6. Merge to main
+
+### GitFlow
+
+A more structured workflow for larger projects with scheduled releases:
+
+1. **Main Branch**: Production-ready code
+2. **Develop Branch**: Latest development changes
+3. **Feature Branches**: New features, branched from develop
+4. **Release Branches**: Preparing for a release
+5. **Hotfix Branches**: Quick fixes for production
+
+#### GitFlow Commands
 
 ```bash
-# Undo staging
-git reset file.txt
+# Initialize GitFlow (requires git-flow extension)
+git flow init
 
-# Discard changes in working directory
-git checkout -- file.txt
+# Start a new feature
+git flow feature start feature-name
 
-# Undo the last commit (keeping changes staged)
-git reset --soft HEAD~1
+# Finish a feature
+git flow feature finish feature-name
 
-# Undo the last commit (unstaging changes)
-git reset HEAD~1
+# Start a release
+git flow release start 1.0.0
 
-# Completely discard last commit and changes
-git reset --hard HEAD~1
+# Finish a release
+git flow release finish 1.0.0
 ```
 
-## Alternative Ways to Use Git
+### Trunk-Based Development
 
-### GitHub Desktop
+A simpler alternative focused on small, frequent changes:
 
-If you prefer a visual approach to Git, GitHub Desktop provides an intuitive way to work with repositories.
+1. Most work happens directly on main (the "trunk")
+2. Feature branches are very short-lived (1-2 days)
+3. Frequent integration to main
+4. Heavy use of feature flags to control functionality
 
-#### Why Use GitHub Desktop?
-- Visual representation of changes
-- Simplified branching and merging
-- No need to remember Git commands
-- Seamless integration with GitHub
+## Git Rebasing
 
-#### Getting Started with GitHub Desktop
-1. Download from [desktop.github.com](https://desktop.github.com/)
-2. Install and sign in with your GitHub account
-3. Clone repositories or add local repositories
+Rebasing is an alternative to merging that creates a cleaner, linear history.
 
-#### Basic Workflow with GitHub Desktop
-1. **Make Changes**: Edit files in your preferred editor
-2. **Review Changes**: See all modified files visually in GitHub Desktop
-3. **Commit Changes**: Add a summary and description, then commit
-4. **Push Changes**: Send commits to GitHub with a click
-5. **Pull Changes**: Update your local copy with remote changes
+### Basic Rebasing
 
-GitHub Desktop is particularly helpful for beginners or those who prefer visual interfaces over command-line tools.
+```bash
+# While on your feature branch
+git rebase main
+```
 
-### GitHub Codespaces
+This takes your branch's commits, sets them aside, applies the main branch's commits, then reapplies your commits on top.
 
-GitHub Codespaces provides a complete, configurable development environment in the cloud.
+### Interactive Rebasing
 
-#### What is Codespaces?
-Codespaces is a cloud-based development environment that lets you code directly in your browser, without setting up a local environment.
+Interactive rebasing allows you to modify commits:
 
-#### Benefits of Using Codespaces
-- Work from any device with a browser
-- Pre-configured development environments
-- Consistent setup across team members
-- Access to VS Code's features in the browser
-- Seamless integration with GitHub repositories
+```bash
+# Rebase the last 3 commits
+git rebase -i HEAD~3
+```
 
-#### Using Codespaces
-1. Navigate to your GitHub repository
-2. Click the "Code" button and select "Open with Codespaces"
-3. Create a new codespace
-4. Start coding in the browser-based editor
+This opens an editor where you can:
+- `pick`: Keep the commit as is
+- `reword`: Change the commit message
+- `edit`: Amend the commit
+- `squash`: Combine with previous commit
+- `fixup`: Combine with previous commit, discard message
+- `drop`: Remove the commit
 
-Codespaces is particularly useful for:
-- Contributing to open-source projects
-- Working on multiple devices
-- Providing consistent environments for team members
-- Testing code in isolated environments
+### When to Use Rebase vs. Merge
+
+**Use rebase when:**
+- You want a clean, linear history
+- Working on a feature branch that needs to incorporate main branch changes
+- Cleaning up local commits before sharing
+
+**Use merge when:**
+- You want to preserve complete history
+- The branch is public and others are basing work on it
+- You want to create an explicit merge commit
+
+### The Golden Rule of Rebasing
+
+**Never rebase commits that have been pushed to a public repository** (unless you're the only one working on that branch).
+
+## Git Hooks
+
+Git hooks are scripts that run automatically when certain Git events occur.
+
+### Types of Hooks
+
+- **Pre-commit**: Runs before a commit is created
+- **Prepare-commit-msg**: Runs before the commit message editor is launched
+- **Commit-msg**: Validates commit messages
+- **Post-commit**: Runs after a commit is created
+- **Pre-push**: Runs before pushing to a remote
+- **Pre-receive**: Runs on the remote when pushing
+- **Post-receive**: Runs on the remote after a push completes
+
+### Creating a Simple Git Hook
+
+Git hooks are stored in the `.git/hooks` directory. To create a hook:
+
+1. Navigate to your repository's hook directory:
+   ```bash
+   cd .git/hooks
+   ```
+
+2. Create a new file with the hook name (without extension):
+   ```bash
+   touch pre-commit
+   chmod +x pre-commit
+   ```
+
+3. Edit the file with your script:
+   ```bash
+   #!/bin/sh
+   # Example: Prevent committing to main branch
+   branch=$(git symbolic-ref HEAD)
+   if [ "$branch" = "refs/heads/main" ]; then
+     echo "Direct commits to main branch are not allowed!"
+     exit 1
+   fi
+   ```
+
+### Common Hook Use Cases
+
+- Enforce code style (run linters)
+- Run tests before commits
+- Validate commit messages (enforce conventional commits)
+- Prevent committing to protected branches
+- Automatically add issue numbers to commit messages
+
+### Sharing Hooks with Your Team
+
+Git hooks aren't copied when a repository is cloned. To share hooks:
+
+1. Store hooks in a directory in your repository:
+   ```
+   project-root/
+   ├── .git/
+   └── git-hooks/
+       └── pre-commit
+   ```
+
+2. Use tools like Husky or pre-commit to install and manage hooks from code
+
+## GitHub Actions
+
+GitHub Actions automates workflows directly in your GitHub repository.
+
+### What are GitHub Actions?
+
+GitHub Actions is a CI/CD (Continuous Integration/Continuous Deployment) platform that allows you to automate your build, test, and deployment pipeline.
+
+### Workflow File Structure
+
+GitHub Actions workflows are defined in YAML files stored in the `.github/workflows` directory:
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests
+      run: npm test
+```
+
+### Common GitHub Actions Use Cases
+
+- **Automated testing**: Run tests when code is pushed
+- **Code linting**: Check code style automatically
+- **Building and publishing packages**: Automate releases
+- **Deployments**: Deploy applications to different environments
+- **Issue and PR management**: Automate labeling, closing, etc.
+
+### Creating Your First GitHub Action
+
+1. Create a `.github/workflows` directory in your repository
+2. Add a YAML file (e.g., `main.yml`) with your workflow configuration
+3. Commit and push to GitHub
+4. View workflow results in the "Actions" tab of your repository
+
+## Advanced Git Techniques
+
+### Git Cherry-Pick
+
+Apply specific commits from one branch to another:
+
+```bash
+git cherry-pick <commit-hash>
+```
+
+### Git Bisect
+
+Find which commit introduced a bug:
+
+```bash
+# Start bisect
+git bisect start
+
+# Mark current commit as bad
+git bisect bad
+
+# Mark a known good commit
+git bisect good <commit-hash>
+
+# Git will checkout commits for you to test
+# After testing, mark each as good or bad
+git bisect good
+# or
+git bisect bad
+
+# When done, reset to your original state
+git bisect reset
+```
+
+### Git Worktree
+
+Work on multiple branches simultaneously without switching:
+
+```bash
+# Add a new worktree
+git worktree add ../path-to-new-directory branch-name
+
+# List worktrees
+git worktree list
+
+# Remove a worktree
+git worktree remove ../path-to-directory
+```
+
+### Submodules and Subtrees
+
+Include other Git repositories within your repository:
+
+**Submodules**:
+```bash
+# Add a submodule
+git submodule add https://github.com/username/repo.git path/to/submodule
+
+# Initialize and update submodules after cloning
+git submodule update --init --recursive
+```
+
+**Subtrees**:
+```bash
+# Add a subtree
+git subtree add --prefix=path/to/subtree https://github.com/username/repo.git main --squash
+```
+
+## Practical Examples
+
+### Example 1: Starting a New Project
+
+```bash
+# Initialize repository
+mkdir my-project
+cd my-project
+git init
+
+# Create initial files
+touch README.md .gitignore
+
+# Edit files with your content
+# ...
+
+# Stage and commit
+git add .
+git commit -m "Initial commit"
+
+# Create repository on GitHub and push
+git remote add origin git@github.com:username/my-project.git
+git push -u origin main
+```
+
+### Example 2: Contributing to an Open Source Project
+
+```bash
+# Fork the repository on GitHub
+
+# Clone your fork
+git clone git@github.com:your-username/project.git
+cd project
+
+# Add original repository as upstream
+git remote add upstream git@github.com:original-owner/project.git
+
+# Create a feature branch
+git checkout -b feature/awesome-feature
+
+# Make changes and commit
+git add .
+git commit -m "Add awesome feature"
+
+# Keep your branch updated with upstream
+git pull upstream main
+git push origin feature/awesome-feature
+
+# Now create a pull request on GitHub
+```
+
+### Example 3: Managing a Release
+
+```bash
+# Create a release branch
+git checkout -b release/1.0.0 develop
+
+# Make any last-minute fixes
+git commit -am "Fix bug #123"
+
+# Merge to main
+git checkout main
+git merge --no-ff release/1.0.0
+git tag -a v1.0.0 -m "Version 1.0.0"
+
+# Merge back to develop
+git checkout develop
+git merge --no-ff release/1.0.0
+
+# Delete release branch
+git branch -d release/1.0.0
+
+# Push everything
+git push origin main develop --tags
+```
+
+### Example 4: Resolving a Merge Conflict
+
+When you encounter a merge conflict:
+
+```bash
+# Attempt merge
+git merge feature-branch
+# Conflict occurs!
+
+# Check which files have conflicts
+git status
+
+# Open conflicted files and resolve manually
+# Look for markers: <<<<<<< HEAD, =======, >>>>>>> feature-branch
+
+# After editing, stage resolved files
+git add resolved-file.txt
+
+# Complete the merge
+git commit
+
+# Push the merged changes
+git push origin main
+```
+
+## Git and GitHub Best Practices
+
+### Commit Messages
+
+Follow these guidelines for clear commit messages:
+
+1. Use present tense ("Add feature" not "Added feature")
+2. Be concise but descriptive
+3. Reference issue numbers when applicable
+4. Consider using conventional commits format:
+   ```
+   feat: add user authentication
+   fix: resolve login page crash (#123)
+   docs: update API documentation
+   ```
+
+### Repository Organization
+
+Keep your repository clean and well-organized:
+
+1. Use a meaningful `.gitignore` file
+2. Include a descriptive README.md
+3. Document your code and processes
+4. Use GitHub issues for tracking work
+5. Apply labels to categorize issues and PRs
+
+### Security Considerations
+
+1. Never commit sensitive information:
+   - API keys or tokens
+   - Passwords or credentials
+   - Personal data
+   
+2. Use environment variables for secrets
+
+3. Consider Git-secrets or similar tools to prevent accidental commits of sensitive data
 
 ## A Message for Beginners
 
